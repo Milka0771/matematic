@@ -237,7 +237,11 @@ const MathAssistant = () => {
           cos
         </button>
         <button
-          onClick={() => setInput('')}
+          onClick={() => {
+            setInput('');
+            setResult('');
+            setSteps([]);
+          }}
           className="bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-center py-2 rounded"
         >
           C
