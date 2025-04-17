@@ -41,11 +41,11 @@ const MathDisplay: React.FC<MathDisplayProps> = ({ formula }) => {
   }, []);
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-300">
       {isLoaded ? (
-        <div className="text-2xl text-center">$$ {formula} $$</div>
+        <div className="text-2xl text-center text-gray-800 dark:text-gray-200">{formula}</div>
       ) : (
-        <div className="text-center">Loading math rendering...</div>
+        <div className="text-center text-gray-500 dark:text-gray-400 animate-pulse">Загрузка формулы...</div>
       )}
     </div>
   );
