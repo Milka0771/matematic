@@ -11,7 +11,7 @@ const MathAssistant = () => {
   const [result, setResult] = useState('');
   const [steps, setSteps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [recognitionService, setRecognitionService] = useState<'mathpix' | 'firebase' | 'tesseract'>('mathpix');
+  const [recognitionService, setRecognitionService] = useState<'tesseract'>('tesseract');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Вспомогательная функция для обновления ввода и очистки результатов
@@ -28,31 +28,16 @@ const MathAssistant = () => {
     setIsProcessing(true);
     
     try {
-      let recognition;
-      
-      if (recognitionService === 'mathpix') {
-        const mathpixAvailable = checkMathpixCredentials();
-        if (!mathpixAvailable) {
-          throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local или выберите другой сервис.');
-        }
-        recognition = await recognizeMath(e.target.files[0]);
-      } else if (recognitionService === 'firebase') {
-        const firebaseAvailable = checkFirebaseConfig();
-        if (!firebaseAvailable) {
-          throw new Error('Firebase не настроен. Пожалуйста, укажите конфигурацию Firebase в файле .env.local или выберите другой сервис.');
-        }
-        recognition = await recognizeMathWithFirebase(e.target.files[0]);
-      } else {
-        // Tesseract OCR
-        const tesseractAvailable = checkTesseractAvailability();
-        if (!tesseractAvailable) {
-          throw new Error('Tesseract недоступен в вашем браузере. Пожалуйста, выберите другой сервис.');
-        }
-        recognition = await recognizeMathWithTesseract(e.target.files[0]);
+      // Используем только Tesseract OCR
+      const tesseractAvailable = checkTesseractAvailability();
+      if (!tesseractAvailable) {
+        throw new Error('Tesseract недоступен в вашем браузере. Пожалуйста, попробуйте другой браузер или обновите текущий.');
       }
       
+      const recognition = await recognizeMathWithTesseract(e.target.files[0]);
+      
       if (recognition.confidence < 0.5) {
-        throw new Error('Низкая точность распознавания. Попробуйте другое изображение или другой сервис распознавания.');
+        throw new Error('Низкая точность распознавания. Попробуйте другое изображение с лучшим качеством.');
       }
 
       updateInput(recognition.latex);
@@ -61,12 +46,8 @@ const MathAssistant = () => {
       let errorMessage = error instanceof Error ? error.message : String(error);
       
       // Более понятные сообщения об ошибках
-      if (errorMessage.includes('Mathpix API error')) {
-        errorMessage = 'Ошибка при обращении к Mathpix API. Проверьте ваши учетные данные в файле .env.local и подключение к интернету.';
-      } else if (errorMessage.includes('Firebase')) {
-        errorMessage = 'Ошибка при обращении к Firebase. Проверьте вашу конфигурацию Firebase в файле .env.local и подключение к интернету.';
-      } else if (errorMessage.includes('Tesseract')) {
-        errorMessage = 'Ошибка при распознавании с помощью Tesseract. Попробуйте другое изображение или другой сервис распознавания.';
+      if (errorMessage.includes('Tesseract')) {
+        errorMessage = 'Ошибка при распознавании с помощью Tesseract. Попробуйте другое изображение с лучшим качеством.';
       }
       
       setSteps([`Ошибка распознавания: ${errorMessage}`]);
@@ -116,15 +97,9 @@ const MathAssistant = () => {
           <label className="font-medium text-gray-700 dark:text-gray-300">Загрузите изображение формулы:</label>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Сервис:</span>
-            <select
-              value={recognitionService}
-              onChange={(e) => setRecognitionService(e.target.value as 'mathpix' | 'firebase' | 'tesseract')}
-              className="text-sm p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-            >
-              <option value="mathpix">Mathpix (платный)</option>
-              <option value="firebase">Firebase (платный)</option>
-              <option value="tesseract">Tesseract (бесплатный)</option>
-            </select>
+            <div className="text-sm p-1 text-gray-800 dark:text-gray-200">
+              Tesseract OCR (бесплатный)
+            </div>
           </div>
         </div>
         <input
