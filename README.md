@@ -27,6 +27,8 @@
 2. Получить API ключи (app_id и app_key)
 3. Добавить их в файл `.env.local`
 
+Подробная инструкция по получению и настройке API ключей Mathpix находится в файле [docs/mathpix-setup.md](./docs/mathpix-setup.md).
+
 ### 2. Firebase + Google Cloud Vision API
 
 Альтернативно, можно использовать Firebase и Google Cloud Vision API:
