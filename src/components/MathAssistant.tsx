@@ -100,6 +100,150 @@ const MathAssistant = () => {
         />
       </div>
 
+      <div className="mb-2 grid grid-cols-3 gap-2">
+        <button
+          onClick={() => setInput(prev => prev + '1')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          1
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '2')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          2
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '3')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          3
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '4')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          4
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '5')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          5
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '6')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          6
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '7')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          7
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '8')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          8
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '9')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          9
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '0')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded col-span-2"
+        >
+          0
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '.')}
+          className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-2 rounded"
+        >
+          .
+        </button>
+      </div>
+
+      <div className="mb-4 grid grid-cols-4 gap-2">
+        <button
+          onClick={() => setInput(prev => prev + '+')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          +
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '-')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          −
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '*')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          ×
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '/')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          ÷
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '^')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          x<sup>y</sup>
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '(')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          (
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + ')')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          )
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + '=')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          =
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + 'sqrt(')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          √
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + 'sin(')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          sin
+        </button>
+        <button
+          onClick={() => setInput(prev => prev + 'cos(')}
+          className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-center py-2 rounded"
+        >
+          cos
+        </button>
+        <button
+          onClick={() => setInput('')}
+          className="bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-center py-2 rounded"
+        >
+          C
+        </button>
+      </div>
+
       <button
         onClick={calculate}
         disabled={!input || isProcessing}
