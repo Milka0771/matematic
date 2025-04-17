@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import MathDisplay from './MathDisplay';
 import { recognizeMath, checkMathpixCredentials } from '@/lib/mathpix';
 import { recognizeMathWithFirebase, checkFirebaseConfig } from '@/lib/firebase';
+import { recognizeMathWithTesseract, checkTesseractAvailability } from '@/lib/tesseract';
 import * as math from 'mathjs';
 
 const MathAssistant = () => {
@@ -10,7 +11,7 @@ const MathAssistant = () => {
   const [result, setResult] = useState('');
   const [steps, setSteps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [recognitionService, setRecognitionService] = useState<'mathpix' | 'firebase'>('mathpix');
+  const [recognitionService, setRecognitionService] = useState<'mathpix' | 'firebase' | 'tesseract'>('mathpix');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Вспомогательная функция для обновления ввода и очистки результатов
@@ -32,19 +33,26 @@ const MathAssistant = () => {
       if (recognitionService === 'mathpix') {
         const mathpixAvailable = checkMathpixCredentials();
         if (!mathpixAvailable) {
-          throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local или переключитесь на Firebase.');
+          throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local или выберите другой сервис.');
         }
         recognition = await recognizeMath(e.target.files[0]);
-      } else {
+      } else if (recognitionService === 'firebase') {
         const firebaseAvailable = checkFirebaseConfig();
         if (!firebaseAvailable) {
-          throw new Error('Firebase не настроен. Пожалуйста, укажите конфигурацию Firebase в файле .env.local или переключитесь на Mathpix.');
+          throw new Error('Firebase не настроен. Пожалуйста, укажите конфигурацию Firebase в файле .env.local или выберите другой сервис.');
         }
         recognition = await recognizeMathWithFirebase(e.target.files[0]);
+      } else {
+        // Tesseract OCR
+        const tesseractAvailable = checkTesseractAvailability();
+        if (!tesseractAvailable) {
+          throw new Error('Tesseract недоступен в вашем браузере. Пожалуйста, выберите другой сервис.');
+        }
+        recognition = await recognizeMathWithTesseract(e.target.files[0]);
       }
       
-      if (recognition.confidence < 0.7) {
-        throw new Error('Низкая точность распознавания. Попробуйте другое изображение.');
+      if (recognition.confidence < 0.5) {
+        throw new Error('Низкая точность распознавания. Попробуйте другое изображение или другой сервис распознавания.');
       }
 
       updateInput(recognition.latex);
@@ -57,6 +65,8 @@ const MathAssistant = () => {
         errorMessage = 'Ошибка при обращении к Mathpix API. Проверьте ваши учетные данные в файле .env.local и подключение к интернету.';
       } else if (errorMessage.includes('Firebase')) {
         errorMessage = 'Ошибка при обращении к Firebase. Проверьте вашу конфигурацию Firebase в файле .env.local и подключение к интернету.';
+      } else if (errorMessage.includes('Tesseract')) {
+        errorMessage = 'Ошибка при распознавании с помощью Tesseract. Попробуйте другое изображение или другой сервис распознавания.';
       }
       
       setSteps([`Ошибка распознавания: ${errorMessage}`]);
@@ -108,11 +118,12 @@ const MathAssistant = () => {
             <span className="text-sm text-gray-600 dark:text-gray-400">Сервис:</span>
             <select
               value={recognitionService}
-              onChange={(e) => setRecognitionService(e.target.value as 'mathpix' | 'firebase')}
+              onChange={(e) => setRecognitionService(e.target.value as 'mathpix' | 'firebase' | 'tesseract')}
               className="text-sm p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
             >
-              <option value="mathpix">Mathpix</option>
-              <option value="firebase">Firebase</option>
+              <option value="mathpix">Mathpix (платный)</option>
+              <option value="firebase">Firebase (платный)</option>
+              <option value="tesseract">Tesseract (бесплатный)</option>
             </select>
           </div>
         </div>
