@@ -11,6 +11,15 @@ const MathAssistant = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Вспомогательная функция для обновления ввода и очистки результатов
+  const updateInput = (newValue: string) => {
+    setInput(newValue);
+    if (result) {
+      setResult('');
+      setSteps([]);
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     setIsProcessing(true);
@@ -94,7 +103,7 @@ const MathAssistant = () => {
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => updateInput(e.target.value)}
           className="w-full p-2 border border-blue-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-700 focus:outline-none"
           placeholder="Например: 2+2*3 или 3^2"
         />
@@ -102,67 +111,67 @@ const MathAssistant = () => {
 
       <div className="mb-2 grid grid-cols-3 gap-2">
         <button
-          onClick={() => setInput(prev => prev + '1')}
+          onClick={() => updateInput(input + '1')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           1
         </button>
         <button
-          onClick={() => setInput(prev => prev + '2')}
+          onClick={() => updateInput(input + '2')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           2
         </button>
         <button
-          onClick={() => setInput(prev => prev + '3')}
+          onClick={() => updateInput(input + '3')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           3
         </button>
         <button
-          onClick={() => setInput(prev => prev + '4')}
+          onClick={() => updateInput(input + '4')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           4
         </button>
         <button
-          onClick={() => setInput(prev => prev + '5')}
+          onClick={() => updateInput(input + '5')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           5
         </button>
         <button
-          onClick={() => setInput(prev => prev + '6')}
+          onClick={() => updateInput(input + '6')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           6
         </button>
         <button
-          onClick={() => setInput(prev => prev + '7')}
+          onClick={() => updateInput(input + '7')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           7
         </button>
         <button
-          onClick={() => setInput(prev => prev + '8')}
+          onClick={() => updateInput(input + '8')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           8
         </button>
         <button
-          onClick={() => setInput(prev => prev + '9')}
+          onClick={() => updateInput(input + '9')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           9
         </button>
         <button
-          onClick={() => setInput(prev => prev + '0')}
+          onClick={() => updateInput(input + '0')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow col-span-2"
         >
           0
         </button>
         <button
-          onClick={() => setInput(prev => prev + '.')}
+          onClick={() => updateInput(input + '.')}
           className="bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           .
@@ -171,67 +180,73 @@ const MathAssistant = () => {
 
       <div className="mb-4 grid grid-cols-4 gap-2">
         <button
-          onClick={() => setInput(prev => prev + '+')}
+          onClick={() => updateInput(input + '+')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           +
         </button>
         <button
-          onClick={() => setInput(prev => prev + '-')}
+          onClick={() => updateInput(input + '-')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           −
         </button>
         <button
-          onClick={() => setInput(prev => prev + '*')}
+          onClick={() => updateInput(input + '*')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           ×
         </button>
         <button
-          onClick={() => setInput(prev => prev + '/')}
+          onClick={() => updateInput(input + '/')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           ÷
         </button>
         <button
-          onClick={() => setInput(prev => prev + '^')}
+          onClick={() => updateInput(input + '^')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           x<sup>y</sup>
         </button>
         <button
-          onClick={() => setInput(prev => prev + '(')}
+          onClick={() => updateInput(input + '(')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           (
         </button>
         <button
-          onClick={() => setInput(prev => prev + ')')}
+          onClick={() => updateInput(input + ')')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           )
         </button>
         <button
-          onClick={() => setInput(prev => prev + '=')}
+          onClick={() => updateInput(input + '=')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           =
         </button>
         <button
-          onClick={() => setInput(prev => prev + 'sqrt(')}
+          onClick={() => updateInput(input.slice(0, -1))}
+          className="bg-amber-100 hover:bg-amber-200 dark:bg-amber-800 dark:hover:bg-amber-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
+        >
+          ⌫
+        </button>
+        <button
+          onClick={() => updateInput(input + 'sqrt(')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           √
         </button>
         <button
-          onClick={() => setInput(prev => prev + 'sin(')}
+          onClick={() => updateInput(input + 'sin(')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           sin
         </button>
         <button
-          onClick={() => setInput(prev => prev + 'cos(')}
+          onClick={() => updateInput(input + 'cos(')}
           className="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-800 dark:hover:bg-indigo-700 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
           cos
