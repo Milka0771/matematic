@@ -58,7 +58,7 @@ const textToLatex = (text: string): string => {
 export const recognizeMathWithTesseract = async (image: File): Promise<RecognitionResult> => {
   try {
     // Создаем воркер Tesseract
-    const worker = await createWorker('rus+eng+equ');
+    const worker = await createWorker('rus+eng');
     
     // Загружаем изображение
     const imageUrl = URL.createObjectURL(image);
