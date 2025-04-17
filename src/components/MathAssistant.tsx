@@ -27,7 +27,7 @@ const MathAssistant = () => {
     try {
       const mathpixAvailable = checkMathpixCredentials();
       if (!mathpixAvailable) {
-        throw new Error('Mathpix API не настроен. Используйте ручной ввод.');
+        throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local');
       }
 
       const recognition = await recognizeMath(e.target.files[0]);
@@ -35,10 +35,17 @@ const MathAssistant = () => {
         throw new Error('Низкая точность распознавания. Попробуйте другое изображение.');
       }
 
-      setInput(recognition.latex);
+      updateInput(recognition.latex);
       setSteps([`Распознано выражение: ${recognition.text}`]);
     } catch (error) {
-      setSteps([`Ошибка распознавания: ${error instanceof Error ? error.message : String(error)}`]);
+      let errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Более понятные сообщения об ошибках
+      if (errorMessage.includes('Mathpix API error')) {
+        errorMessage = 'Ошибка при обращении к Mathpix API. Проверьте ваши учетные данные в файле .env.local и подключение к интернету.';
+      }
+      
+      setSteps([`Ошибка распознавания: ${errorMessage}`]);
     } finally {
       setIsProcessing(false);
     }
