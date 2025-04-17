@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import MathDisplay from './MathDisplay';
 import { recognizeMath, checkMathpixCredentials } from '@/lib/mathpix';
+import { recognizeMathWithFirebase, checkFirebaseConfig } from '@/lib/firebase';
 import * as math from 'mathjs';
 
 const MathAssistant = () => {
@@ -9,6 +10,7 @@ const MathAssistant = () => {
   const [result, setResult] = useState('');
   const [steps, setSteps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [recognitionService, setRecognitionService] = useState<'mathpix' | 'firebase'>('mathpix');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Вспомогательная функция для обновления ввода и очистки результатов
@@ -25,12 +27,22 @@ const MathAssistant = () => {
     setIsProcessing(true);
     
     try {
-      const mathpixAvailable = checkMathpixCredentials();
-      if (!mathpixAvailable) {
-        throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local');
+      let recognition;
+      
+      if (recognitionService === 'mathpix') {
+        const mathpixAvailable = checkMathpixCredentials();
+        if (!mathpixAvailable) {
+          throw new Error('Mathpix API не настроен. Пожалуйста, укажите ваши учетные данные в файле .env.local или переключитесь на Firebase.');
+        }
+        recognition = await recognizeMath(e.target.files[0]);
+      } else {
+        const firebaseAvailable = checkFirebaseConfig();
+        if (!firebaseAvailable) {
+          throw new Error('Firebase не настроен. Пожалуйста, укажите конфигурацию Firebase в файле .env.local или переключитесь на Mathpix.');
+        }
+        recognition = await recognizeMathWithFirebase(e.target.files[0]);
       }
-
-      const recognition = await recognizeMath(e.target.files[0]);
+      
       if (recognition.confidence < 0.7) {
         throw new Error('Низкая точность распознавания. Попробуйте другое изображение.');
       }
@@ -43,6 +55,8 @@ const MathAssistant = () => {
       // Более понятные сообщения об ошибках
       if (errorMessage.includes('Mathpix API error')) {
         errorMessage = 'Ошибка при обращении к Mathpix API. Проверьте ваши учетные данные в файле .env.local и подключение к интернету.';
+      } else if (errorMessage.includes('Firebase')) {
+        errorMessage = 'Ошибка при обращении к Firebase. Проверьте вашу конфигурацию Firebase в файле .env.local и подключение к интернету.';
       }
       
       setSteps([`Ошибка распознавания: ${errorMessage}`]);
@@ -88,7 +102,20 @@ const MathAssistant = () => {
       <h2 className="text-2xl font-bold mb-4 text-center text-blue-700 dark:text-blue-300">Математический помощник</h2>
       
       <div className="mb-4">
-        <label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">Загрузите изображение формулы:</label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="font-medium text-gray-700 dark:text-gray-300">Загрузите изображение формулы:</label>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Сервис:</span>
+            <select
+              value={recognitionService}
+              onChange={(e) => setRecognitionService(e.target.value as 'mathpix' | 'firebase')}
+              className="text-sm p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+            >
+              <option value="mathpix">Mathpix</option>
+              <option value="firebase">Firebase</option>
+            </select>
+          </div>
+        </div>
         <input
           type="file"
           ref={fileInputRef}
