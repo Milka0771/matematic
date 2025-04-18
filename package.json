@@ -11,6 +11,8 @@
   "dependencies": {
     "@firebase/functions": "^0.12.3",
     "@firebase/storage": "^0.13.7",
+    "@types/d3": "^7.4.3",
+    "d3": "^7.9.0",
     "firebase": "^11.6.0",
     "mathjax-full": "^3.2.2",
     "mathjs": "^14.4.0",

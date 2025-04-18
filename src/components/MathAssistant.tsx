@@ -1,25 +1,39 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MathDisplay from './MathDisplay';
+import InteractiveSteps from './InteractiveSteps';
+import FunctionGraph from './FunctionGraph';
 import { recognizeMath, checkMathpixCredentials } from '@/lib/mathpix';
 import { recognizeMathWithFirebase, checkFirebaseConfig } from '@/lib/firebase';
 import { recognizeMathWithTesseract, checkTesseractAvailability } from '@/lib/tesseract';
 import * as math from 'mathjs';
+import { SolverFactory } from '@/lib/solvers/SolverFactory';
+import { Solution, SolutionStep, VisualizationData } from '@/lib/solvers/MathSolver';
+import { CalculationSolver } from '@/lib/solvers/CalculationSolver';
+import { AlgebraicSolver } from '@/lib/solvers/AlgebraicSolver';
 
 const MathAssistant = () => {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
-  const [steps, setSteps] = useState<string[]>([]);
+  const [solution, setSolution] = useState<Solution | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recognitionService, setRecognitionService] = useState<'tesseract'>('tesseract');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Создаем фабрику решателей
+  const [solverFactory] = useState(() => {
+    const factory = new SolverFactory();
+    factory.registerSolver(new CalculationSolver());
+    factory.registerSolver(new AlgebraicSolver());
+    return factory;
+  });
 
   // Вспомогательная функция для обновления ввода и очистки результатов
   const updateInput = (newValue: string) => {
     setInput(newValue);
     if (result) {
       setResult('');
-      setSteps([]);
+      setSolution(null);
     }
   };
 
@@ -41,7 +55,17 @@ const MathAssistant = () => {
       }
 
       updateInput(recognition.latex);
-      setSteps([`Распознано выражение: ${recognition.text}`]);
+      setSolution({
+        steps: [{
+          description: 'Распознавание выражения',
+          formula: recognition.latex,
+          explanation: `Распознано выражение: ${recognition.text}`,
+          detailedExplanation: `Точность распознавания: ${(recognition.confidence * 100).toFixed(1)}%`
+        }],
+        result: '',
+        type: 'recognition',
+        difficulty: 'basic'
+      });
     } catch (error) {
       let errorMessage = error instanceof Error ? error.message : String(error);
       
@@ -50,7 +74,16 @@ const MathAssistant = () => {
         errorMessage = 'Ошибка при распознавании с помощью Tesseract. Попробуйте другое изображение с лучшим качеством.';
       }
       
-      setSteps([`Ошибка распознавания: ${errorMessage}`]);
+      setSolution({
+        steps: [{
+          description: 'Ошибка распознавания',
+          formula: input || '\\text{Ошибка}',
+          explanation: `Ошибка распознавания: ${errorMessage}`
+        }],
+        result: 'Ошибка',
+        type: 'error',
+        difficulty: 'basic'
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -58,34 +91,37 @@ const MathAssistant = () => {
 
   const calculate = async () => {
     try {
-        const node = math.parse(input);
-        const calculationResult = math.evaluate(input);
-        
-        setResult(math.format(calculationResult));
-        
-        setSteps(prev => [
-          ...prev,
-          `Вычисление: ${input}`,
-          `Структура выражения: ${node.toString()}`,
-          `Результат: ${math.format(calculationResult)}`,
-          `Тип результата: ${typeof calculationResult === 'number' ? 'число' : math.typeOf(calculationResult)}`
-        ]);
-
-        // Добавляем визуализацию для простых уравнений
-        if (input.includes('=')) {
-          const [left, right] = input.split('=');
-          setSteps(prev => [
-            ...prev,
-            `Шаг решения уравнения:`,
-            `1. ${left} = ${right}`,
-            `2. ${left} - ${right} = 0`,
-            `3. Решение относительно переменной`
-          ]);
-        }
-      } catch (error) {
-        setResult('Ошибка вычисления');
-        setSteps(prev => [...prev, `Ошибка: ${error instanceof Error ? error.message : String(error)}`]);
+      setIsProcessing(true);
+      
+      // Получаем подходящий решатель для ввода
+      const solver = solverFactory.getSolverForInput(input);
+      
+      if (!solver) {
+        throw new Error('Не удалось определить тип задачи. Проверьте правильность ввода.');
       }
+      
+      // Решаем задачу
+      const solutionResult = solver.solve(input);
+      
+      // Обновляем состояние
+      setResult(solutionResult.result);
+      setSolution(solutionResult);
+      
+    } catch (error) {
+      setResult('Ошибка вычисления');
+      setSolution({
+        steps: [{
+          description: 'Ошибка',
+          formula: input,
+          explanation: `Произошла ошибка: ${error instanceof Error ? error.message : String(error)}`
+        }],
+        result: 'Ошибка',
+        type: 'error',
+        difficulty: 'basic'
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -275,7 +311,7 @@ const MathAssistant = () => {
           onClick={() => {
             setInput('');
             setResult('');
-            setSteps([]);
+            setSolution(null);
           }}
           className="bg-red-200 hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600 text-center py-3 rounded-md font-medium text-gray-800 dark:text-white shadow-sm transition-all duration-200 hover:shadow"
         >
@@ -295,14 +331,9 @@ const MathAssistant = () => {
         <MathDisplay formula={input || '\\text{Введите выражение или загрузите изображение}'} />
       </div>
 
-      {steps.length > 0 && (
+      {solution && (
         <div className="mt-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-indigo-900 rounded-lg shadow-md border border-blue-100 dark:border-gray-700">
-          <h3 className="font-bold mb-3 text-blue-700 dark:text-blue-300 text-lg">Процесс решения:</h3>
-          <ul className="list-decimal pl-5 space-y-3">
-            {steps.map((step, i) => (
-              <li key={i} className="text-gray-700 dark:text-gray-300">{step}</li>
-            ))}
-          </ul>
+          <InteractiveSteps steps={solution.steps} />
           
           {result && (
             <>
@@ -310,6 +341,44 @@ const MathAssistant = () => {
               <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm">
                 <MathDisplay formula={`${input} = ${result}`} />
               </div>
+              
+              {solution.difficulty !== 'basic' && (
+                <div className="mt-3 text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                  <span className="mr-2">Сложность:</span>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    solution.difficulty === 'advanced'
+                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      : solution.difficulty === 'intermediate'
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                        : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                  }`}>
+                    {solution.difficulty === 'advanced'
+                      ? 'Продвинутый'
+                      : solution.difficulty === 'intermediate'
+                        ? 'Средний'
+                        : 'Базовый'}
+                  </span>
+                </div>
+              )}
+              
+              {/* Визуализация, если она доступна */}
+              {solution.visualization &&
+               solution.visualization.type === 'function-graph' &&
+               solution.visualization.expression && (
+                <div className="mt-5">
+                  <h3 className="font-bold mb-3 text-blue-700 dark:text-blue-300 text-lg">Визуализация:</h3>
+                  <div className="overflow-x-auto">
+                    <FunctionGraph
+                      expression={solution.visualization.expression}
+                      variable={solution.visualization.variable || 'x'}
+                      xRange={solution.visualization.xRange || [-10, 10]}
+                      solutionPoints={solution.visualization.solutionPoints}
+                      width={600}
+                      height={400}
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
